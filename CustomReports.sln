@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29319.158
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomReportsManager", "CustomReportsManager\CustomReportsManager.csproj", "{1345B022-649A-441E-8B21-901DF654B893}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomReports", "CustomReports\CustomReports.csproj", "{FE6FC698-672C-40C5-92FB-C6BF6A09DDBA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1345B022-649A-441E-8B21-901DF654B893}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1345B022-649A-441E-8B21-901DF654B893}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1345B022-649A-441E-8B21-901DF654B893}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1345B022-649A-441E-8B21-901DF654B893}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE6FC698-672C-40C5-92FB-C6BF6A09DDBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE6FC698-672C-40C5-92FB-C6BF6A09DDBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE6FC698-672C-40C5-92FB-C6BF6A09DDBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE6FC698-672C-40C5-92FB-C6BF6A09DDBA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F85C44DA-A8E3-4D46-B6A9-5C3AC3B2DBEC}
+	EndGlobalSection
+EndGlobal

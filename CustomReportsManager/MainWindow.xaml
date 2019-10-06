@@ -1,0 +1,537 @@
+﻿<Window x:Class="CustomReportsManager.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CustomReportsManager"
+        mc:Ignorable="d"
+        Title="Произвольные отчеты - управление" 
+        Height="530"
+        Width="800"
+        MinHeight="530"
+        MinWidth="800"
+        Background="#FFF0F0F0"
+        WindowStartupLocation="CenterScreen" Icon="icon.ico">
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TabControl>
+            <TabItem Header="Список отчетов">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Center"
+                                Margin="0,0,0,10">
+                        <Button HorizontalAlignment="Left"
+                                x:Name="ButtonAddNewReport"
+                                Width="100" 
+                                ToolTip="Добавление нового отчета"
+                                Click="ButtonAddNewReport_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="Media/Add_16x.png" 
+                                       Stretch="None"/>
+                                <TextBlock Text="Добавить"
+                                           TextAlignment="Center"
+                                           Margin="6,0,0,0"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button HorizontalAlignment="Left"
+                                Width="100"
+                                Margin="10,0,0,0" 
+                                ToolTip="Удаление выбранного отчета"
+                                Click="ButtonRemoveSelected_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="Media/Remove_16x.png" 
+                                       Stretch="None"/>
+                                <TextBlock Text="Удалить"
+                                       TextAlignment="Center"
+                                       Margin="6,0,0,0"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                    <DataGrid Grid.Row="1" 
+				              Margin="0,0,0,10"
+				              SelectionUnit="FullRow"
+				              CanUserDeleteRows="False"
+				              CanUserAddRows="False"
+				              CanUserReorderColumns="False"
+				              HorizontalGridLinesBrush="#FFC8C8C8"
+				              VerticalGridLinesBrush="LightGray"
+				              AutoGenerateColumns="False"
+				              ItemsSource="{Binding ReportItems}"
+				              x:Name="DataGridReports"
+				              SelectionMode="Single"> 
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" 
+                                                Binding="{Binding ID,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"
+                                                IsReadOnly="True"/>
+                            
+                            <DataGridTextColumn Header="Название" 
+                                                Binding="{Binding Name,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+
+                            <DataGridTemplateColumn Header="Получатели">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="6,0,6,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <TextBlock Text="{Binding RecipientsCount,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
+                                            
+                                            <Button Tag="EditRecipients" 
+                                                    Width="20"
+                                                    ToolTip="Редактировать список получателей"
+                                                    Click="ButtonItemReport_Click"
+                                                    Margin="6,0,0,0"
+                                                    Grid.Column="1">
+                                                <Image Source="Media/Edit_16x.png" 
+											       Stretch="None"/>
+                                            </Button>
+                                        </Grid>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="Запрос">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="6,0,6,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <TextBlock Text="{Binding QueryCount,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
+                                            
+                                            <Button Width="20"
+                                                    ToolTip="Редактировать текст запроса"
+                                                    Tag="EditQuery"
+                                                    Click="ButtonItemReport_Click"
+                                                    Margin="6,0,0,0"
+                                                    Grid.Column="1">
+                                                <Image Source="Media/Edit_16x.png" 
+											   Stretch="None"/>
+                                            </Button>
+                                        </Grid>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            
+                            <DataGridCheckBoxColumn Header="Сохранять&#x0a;в папку" 
+									                Binding="{Binding ShouldBeSavedToFolder, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+
+                            <DataGridTemplateColumn Header="Путь для сохранения">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="6,0,6,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <TextBlock Text="{Binding FolderToSave,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"
+                                                       HorizontalAlignment="Left"/>
+                                            
+                                            <Button Tag="EditFolderToSave"
+                                                    Width="20"
+                                                    ToolTip="Выбрать папку для сохранения"
+                                                    Click="ButtonItemReport_Click"
+                                                    Margin="6,0,6,0"
+                                                    Grid.Column="1">
+                                                <Image Source="Media/Folder_16x.png" 
+											   Stretch="None"/>
+                                            </Button>
+                                            
+                                            <Button Tag="CleanFolderToSave" 
+                                                    Width="20"
+                                                    ToolTip="Очистить путь для сохранения"
+                                                    Click="ButtonItemReport_Click"
+                                                    Grid.Column="2">
+                                                <Image Source="Media/CleanData_16x.png" 
+											   Stretch="None"/>
+                                            </Button>
+                                        </Grid>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <StackPanel Grid.Row="2"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Center">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="26"/>
+                                <RowDefinition Height="6"/>
+                                <RowDefinition Height="26"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="6"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="Период:" 
+                                        VerticalAlignment="Center"/>
+
+                            <StackPanel Orientation="Horizontal"
+                                        Grid.Column="2"
+                                        HorizontalAlignment="Center">
+                                <DatePicker VerticalAlignment="Center"
+                                            SelectedDate="{Binding DateBegin,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+
+                                <Button Width="30"
+                                        ToolTip="Приравнять дату окончания дате начала"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Margin="2,0,2,0"
+                                        Command="{Binding ButtonClick}"
+                                        CommandParameter="EquateEndDateToBeginDate">
+                                    <Image Source="Media/equalDates.png" 
+                                   Stretch="None"/>
+                                </Button>
+
+                                <DatePicker VerticalAlignment="Center"
+                                            SelectedDate="{Binding DateEnd,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal"
+                                        Grid.Row="2"
+                                        Grid.Column="2"
+                                        HorizontalAlignment="Center">
+                                <Button Width="30" 
+                                        ToolTip="Текущий день"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Command="{Binding ButtonClick}"
+                                        CommandParameter="SetDatesToCurrentDay">
+                                    <Image Source="Media/1.png" 
+                                   Stretch="None"/>
+                                </Button>
+
+                                <Button Width="30" 
+                                        ToolTip="Текущая неделя"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Command="{Binding ButtonClick}"
+                                        CommandParameter="SetDatesToCurrentWeek">
+                                    <Image Source="Media/7.png" 
+                                   Stretch="None"/>
+                                </Button>
+
+                                <Button Width="30" 
+                                        ToolTip="Текущий месяц"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Command="{Binding ButtonClick}"
+                                        CommandParameter="SetDatesToCurrentMonth">
+                                    <Image Source="Media/31.png" 
+                                   Stretch="None"/>
+                                </Button>
+
+                                <Button Width="30" 
+                                        ToolTip="Текущий год"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Command="{Binding ButtonClick}"
+                                        CommandParameter="SetDatesToCurrentYear">
+                                    <Image Source="Media/year.png" 
+                                   Stretch="None"/>
+                                </Button>
+
+                                <Button Width="30" 
+                                        ToolTip="На месяц назад"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Command="{Binding ButtonClick}"
+                                        CommandParameter="GoToPreviousMonth">
+                                    <Image Source="Media/previousMonth.png" 
+                                   Stretch="None"/>
+                                </Button>
+
+                                <Button Width="30" 
+                                        ToolTip="На день назад"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Command="{Binding ButtonClick}"
+                                        CommandParameter="GoToPreviousDay">
+                                    <Image Source="Media/previousDay.png" 
+                                   Stretch="None"/>
+                                </Button>
+
+                                <Button Width="30" 
+                                        ToolTip="На день вперед"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Command="{Binding ButtonClick}"
+                                        CommandParameter="GoToNextDay">
+                                    <Image Source="Media/nextDay.png" 
+                                   Stretch="None"/>
+                                </Button>
+
+                                <Button Width="30" 
+                                        ToolTip="На месяц вперед"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Command="{Binding ButtonClick}"
+                                        CommandParameter="GoToNextMonth">
+                                    <Image Source="Media/nextMonth.png" 
+                                   Stretch="None"/>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+
+                        <Button Width="120"
+                                Height="20"
+                                Margin="20,3,0,0"
+                                VerticalAlignment="Top"
+                                ToolTip="Сформировать выбранный отчет с заданным периодом"
+                                Click="ButtonCreate_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="Media/Create_16x.png" 
+                                        Stretch="None"/>
+                                <TextBlock Text="Сформировать"
+                                            Margin="6,0,0,0"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+
+
+
+
+
+            <TabItem Header="Системные настройки">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="20"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="20"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="20"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="6"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Text="Максимально допустимое количество лог-файлов (шт.):"/>
+
+                        <TextBox Grid.Column="2"
+                             Width="60"
+                             HorizontalAlignment="Left"
+                             Text="{Binding MaxLogfilesQuantity}"/>
+                    </Grid>
+
+                    <GroupBox Grid.Row="2" 
+                          Header="Подключение к БД МИС Инфоклиника">
+                        <Grid Margin="10">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="10"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="10"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="6"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="20"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="6"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="Адрес БД:"/>
+                            <TextBox Grid.Column="2"
+                                     Text="{Binding MisDbAddress}"/>
+
+                            <TextBlock Grid.Row="2"
+                                       Text="Имя базы:"/>
+                            <TextBox Grid.Row="2"
+                                     Grid.Column="2"
+                                     Text="{Binding MisDbName}"/>
+
+                            <TextBlock Grid.Column="4"
+                                       Text="Имя пользователя:"/>
+                            <TextBox Grid.Column="6"
+                                     Text="{Binding MisDbUserName}"/>
+
+                            <TextBlock Grid.Row="2"
+                                       Grid.Column="4"
+                                       Text="Пароль:"/>
+                            <PasswordBox Grid.Row="2"
+                                         Grid.Column="6"
+                                         local:PasswordHelper.Attach="True"
+                                         local:PasswordHelper.Password="{Binding MisDbUserPassword, Mode=TwoWay}"/>
+
+                            <Button Grid.Row="4"
+                                    Grid.ColumnSpan="7"
+                                    Width="180"
+                                    Command="{Binding ButtonClick}"
+                                    CommandParameter="CheckDbConnection" 
+                                    ToolTip="Проверить подключение к БД">
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="Media/Connect_16x.png" 
+                                           Stretch="None"/>
+                                    <TextBlock Text="Проверить подключение" 
+                                               Margin="6,0,6,0"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </GroupBox>
+
+                    <Grid Grid.Row="4">
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition Height="10"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="6"/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Text="Получатели системных уведомлений:"/>
+
+                        <TextBox Grid.Column="2"
+                                 IsReadOnly="True"
+                                 Text="{Binding MailAdminAddress}"/>
+
+                        <Button Grid.Column="4"
+                                Width="20"
+                                Tag="Получатели системных уведомлений:"
+                                Click="ButtonEditRecipients">
+                            <Image Source="Media/Edit_16x.png" 
+                                   Stretch="None"/>
+                        </Button>
+
+                        <CheckBox Grid.Row="2"
+                                  Content="Ставить получателей системных уведомлений в копию всех писем"
+                                  Grid.ColumnSpan="5"
+                                  IsChecked="{Binding ShouldAddAdminToCopy}"/>
+                    </Grid>
+
+                    <GroupBox Grid.Row="6"
+                              Header="Настройки SMTP-почты">
+                        <Grid Grid.Row="2" Margin="10">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="10"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="10"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="10"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="6"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="6"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="Адрес SMTP-сервера:"/>
+                                <TextBox Grid.Column="2"
+                                        Text="{Binding MailSmtpServer}"/>
+
+                                <TextBlock Grid.Column="4"
+                                           Text="Порт:"/>
+                                <TextBox Grid.Column="6"
+                                         Text="{Binding MailSmtpPort}"/>
+
+                                <TextBlock Grid.Row="2"
+                                           Text="Имя пользователя:"/>
+                                <TextBox Grid.Row="2"
+                                         Grid.Column="2"
+                                         Text="{Binding MailUser}"/>
+
+                                <TextBlock Grid.Row="2"
+                                           Grid.Column="4"
+                                           Text="Пароль:"/>
+                                <PasswordBox Grid.Row="2"
+                                             Grid.Column="6"
+                                             local:PasswordHelper.Attach="True"
+                                             local:PasswordHelper.Password="{Binding MailPassword,Mode=TwoWay}"/>
+
+                                <TextBlock Grid.Row="4"
+                                           Text="Домен:"/>
+                                <TextBox Grid.Row="4"
+                                         Grid.Column="2"
+                                         Text="{Binding MailUserDomain}"/>
+
+                                <CheckBox Grid.Row="4"
+                                          Grid.Column="4"
+                                          Grid.ColumnSpan="3"
+                                          Content="Использовать SSL"
+                                          IsChecked="{Binding MailEnableSSL}"/>
+
+                                <Button Grid.Row="6"
+                                        Grid.ColumnSpan="7"
+                                        Width="180"
+                                        Command="{Binding ButtonClick}"
+                                        CommandParameter="CheckMailSettings" 
+                                        ToolTip="Проверить подключение к SMTP-серверу">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="Media/Connect_16x.png" Stretch="None"/>
+                                        <TextBlock Text="Проверить подключение" Margin="6,0,6,0"/>
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    </GroupBox>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <Button Grid.Row="2"
+                Width="100"
+                HorizontalAlignment="Center"
+                Command="{Binding ButtonClick}"
+                CommandParameter="SaveConfig">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="Media/Save_16x.png" Stretch="None"/>
+                <TextBlock Text="Сохранить" Margin="6,0,0,0"/>
+            </StackPanel>
+        </Button>
+    </Grid>
+
+
+</Window>
