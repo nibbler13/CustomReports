@@ -34,7 +34,7 @@ namespace CustomReports {
 			}
 		}
 
-		public static string GetResultFilePath(string resultFilePrefix, bool isPlainText = false) {
+		public static string GetResultFilePath(string resultFilePrefix, bool isCSV = false) {
 			string resultPath = Path.Combine(Program.AssemblyDirectory, "Results");
 			if (!Directory.Exists(resultPath))
 				Directory.CreateDirectory(resultPath);
@@ -43,12 +43,33 @@ namespace CustomReports {
 				resultFilePrefix = resultFilePrefix.Replace(item, '-');
 
 			string fileEnding = ".xlsx";
-			if (isPlainText)
-				fileEnding = ".txt";
+			if (isCSV)
+				fileEnding = ".csv";
 
 			string resultFile = Path.Combine(resultPath, resultFilePrefix + " " + DateTime.Now.ToString("yyyyMMdd_HHmmss") + fileEnding);
 			
 			return resultFile;
+		}
+
+		public static string SaveAsCSV(DataTable dataTable, string resultFilePrevix) {
+			string fileName = GetResultFilePath(resultFilePrevix, true);
+
+			StringBuilder sb = new StringBuilder();
+			IEnumerable<string> columnNames = dataTable.Columns.Cast<DataColumn>().Select(c => c.ColumnName);
+			sb.AppendLine(string.Join("\t", columnNames));
+			foreach (DataRow dataRow in dataTable.Rows) {
+				IEnumerable<string> fields = dataRow.ItemArray.Select(f => f.ToString());
+				sb.AppendLine(string.Join("\t", fields));
+			}
+
+			try {
+				File.WriteAllText(fileName, sb.ToString(), Encoding.GetEncoding("windows-1251"));
+			} catch (Exception e) {
+				Logging.ToLog(e.Message + Environment.NewLine + e.StackTrace);
+				return string.Empty;
+			}
+
+			return fileName;
 		}
 
 		protected static bool SaveAndCloseIWorkbook(IWorkbook workbook, string resultFile) {
@@ -80,10 +101,10 @@ namespace CustomReports {
 			fontMain.FontHeightInPoints = 10;
 			IDataFormat dataFormat = workbook.CreateDataFormat();
 			ICellStyle cellStyle = workbook.CreateCellStyle();
-			cellStyle.BorderTop = BorderStyle.Dotted;
-			cellStyle.BorderBottom = BorderStyle.Dotted;
-			cellStyle.BorderLeft = BorderStyle.Dotted;
-			cellStyle.BorderRight = BorderStyle.Dotted;
+			cellStyle.BorderTop = BorderStyle.Thin;
+			cellStyle.BorderBottom = BorderStyle.Thin;
+			cellStyle.BorderLeft = BorderStyle.Thin;
+			cellStyle.BorderRight = BorderStyle.Thin;
 			cellStyle.SetFont(fontMain);
 
 			ICellStyle cellStyleDateWithTime = workbook.CreateCellStyle();
@@ -97,6 +118,10 @@ namespace CustomReports {
 			ICellStyle cellStyleOnlyTime = workbook.CreateCellStyle();
 			cellStyleOnlyTime.CloneStyleFrom(cellStyle);
 			cellStyleOnlyTime.DataFormat = dataFormat.GetFormat("HH:mm");
+
+			ICellStyle cellStyleOnlyTimeWithSeconds = workbook.CreateCellStyle();
+			cellStyleOnlyTimeWithSeconds.CloneStyleFrom(cellStyle);
+			cellStyleOnlyTimeWithSeconds.DataFormat = dataFormat.GetFormat("HH:mm:ss");
 
 			IFont fontBold = workbook.CreateFont();
 			fontBold.Boldweight = (short)FontBoldWeight.Bold;
@@ -147,22 +172,55 @@ namespace CustomReports {
 
 					string value = dataRow[column].ToString();
 
-					if (double.TryParse(value, out double result)) {
-						cell.SetCellValue(result);
-					} else if (value.Length >= 8 && DateTime.TryParse(value, out DateTime date)) {
-						cell.SetCellValue(date);
-
-						if (date.TimeOfDay.TotalSeconds > 0) {
-							cell.CellStyle = cellStyleDateWithTime;
-						} else {
-							cell.CellStyle = cellStyleOnlyDate;
-						}
-					} else if (value.Length >=3 && value.Length <= 5 &&
-						DateTime.TryParse(value, out DateTime time)) {
-						cell.SetCellValue(time);
-						cell.CellStyle = cellStyleOnlyTime;
+					Type columnType = column.DataType;
+					if (columnType == typeof(DateTime)) {
+						if (DateTime.TryParse(value, out DateTime dateTime)) {
+							cell.SetCellValue(dateTime);
+							if (dateTime.TimeOfDay.TotalSeconds > 0)
+								cell.CellStyle = cellStyleDateWithTime;
+							else
+								cell.CellStyle = cellStyleOnlyDate;
+						} else
+							cell.SetCellValue(value);
+					} else if (columnType == typeof(TimeSpan)) {
+						if (TimeSpan.TryParse(value, out TimeSpan timeSpan)) {
+							cell.SetCellValue(DateTime.Parse(value));
+							cell.CellStyle = cellStyleOnlyTimeWithSeconds;
+						} else
+							cell.SetCellValue(value);
+					} else if (columnType == typeof(double) ||
+						columnType == typeof(float) ||
+						columnType == typeof(long) || 
+						columnType == typeof(int) ||
+						columnType == typeof(short)) {
+						if (double.TryParse(value, out double parsedDouble))
+							cell.SetCellValue(parsedDouble);
+						else
+							cell.SetCellValue(value);
 					} else {
-						cell.SetCellValue(value);
+						if (double.TryParse(value, out double result)) {
+							cell.SetCellValue(result);
+						} else if (
+							(value.Length == 7 || value.Length == 8) &&
+							value.Count(x => x.Equals(':')) == 2 &&
+							DateTime.TryParse(value, out DateTime timeWithSecond)) {
+							cell.SetCellValue(timeWithSecond);
+							cell.CellStyle = cellStyleOnlyTimeWithSeconds;
+						} else if (value.Length >= 8 && DateTime.TryParse(value, out DateTime date)) {
+							cell.SetCellValue(date);
+
+							if (date.TimeOfDay.TotalSeconds > 0) {
+								cell.CellStyle = cellStyleDateWithTime;
+							} else {
+								cell.CellStyle = cellStyleOnlyDate;
+							}
+						} else if (value.Length >= 3 && value.Length <= 5 &&
+							DateTime.TryParse(value, out DateTime time)) {
+							cell.SetCellValue(time);
+							cell.CellStyle = cellStyleOnlyTime;
+						} else {
+							cell.SetCellValue(value);
+						}
 					}
 					
 					columnNumber++;

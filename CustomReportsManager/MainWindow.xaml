@@ -6,9 +6,9 @@
         xmlns:local="clr-namespace:CustomReportsManager"
         mc:Ignorable="d"
         Title="Произвольные отчеты - управление" 
-        Height="530"
+        Height="680"
         Width="800"
-        MinHeight="530"
+        MinHeight="680"
         MinWidth="800"
         Background="#FFF0F0F0"
         WindowStartupLocation="CenterScreen" Icon="icon.ico">
@@ -131,7 +131,10 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            
+
+                            <DataGridCheckBoxColumn Header="CSV"
+                                                    Binding="{Binding SaveAsCSV,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+
                             <DataGridCheckBoxColumn Header="Сохранять&#x0a;в папку" 
 									                Binding="{Binding ShouldBeSavedToFolder, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
 
@@ -330,6 +333,8 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="20"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="20"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <Grid>
@@ -517,6 +522,34 @@
                             </Grid>
                         </Grid>
                     </GroupBox>
+
+                    <Grid Grid.Row="8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="10"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Text="Имя отправителя:"/>
+                            <TextBox Text="{Binding MailSenderName,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" Margin="6,0,0,0"/>
+                        </Grid>
+
+                        <StackPanel Grid.Row="2">
+                            <TextBlock Text="Подпись:"/>
+                            <TextBox Text="{Binding MailSign,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                     Margin="0,6,0,0"
+                                     Height="80"
+                                     TextWrapping="Wrap"
+                                     VerticalScrollBarVisibility="Auto"
+                                     AcceptsReturn="True"/>
+                        </StackPanel>
+                    </Grid>
                 </Grid>
             </TabItem>
         </TabControl>

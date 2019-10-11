@@ -171,11 +171,13 @@ namespace CustomReports {
 			if (dataTableMainData.Rows.Count > 0) {
 				Logging.ToLog("Запись данных в файл");
 
-				itemReport.FileResult = ExcelGeneral.WriteDataTableToExcel(
-					dataTableMainData, subject);
+				if (itemReport.SaveAsCSV)
+					itemReport.FileResult = ExcelGeneral.SaveAsCSV(dataTableMainData, subject);
+				else 
+					itemReport.FileResult = ExcelGeneral.WriteDataTableToExcel(
+						dataTableMainData, subject);
 				
 				if (File.Exists(itemReport.FileResult)) {
-
 					body = "Отчет во вложении";
 					Logging.ToLog("Данные сохранены в файл: " + itemReport.FileResult);
 				} else {

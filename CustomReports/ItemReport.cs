@@ -91,6 +91,17 @@ namespace CustomReports {
 			}
 		}
 
+		private bool saveAsCSV;
+		public bool SaveAsCSV {
+			get { return saveAsCSV; } 
+			set {
+				if (value != saveAsCSV) {
+					saveAsCSV = value;
+					NotifyPropertyChanged();
+				}
+			}
+		}
+
 		private bool shouldBeSavedToFolder;
 		public bool ShouldBeSavedToFolder {
 			get { return shouldBeSavedToFolder; }

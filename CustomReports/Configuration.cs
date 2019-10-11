@@ -161,6 +161,28 @@ namespace CustomReports {
 				}
 			}
 		}
+
+		private string mailSenderName;
+		public string MailSenderName {
+			get { return mailSenderName; }
+			set {
+				if (value != mailSenderName) {
+					mailSenderName = value;
+					NotifyPropertyChanged();
+				}
+			}
+		}
+
+		private string mailSign;
+		public string MailSign {
+			get { return mailSign; }
+			set {
+				if (value != mailSign) {
+					mailSign = value;
+					NotifyPropertyChanged();
+				}
+			}
+		}
 		#endregion
 
 
@@ -440,6 +462,11 @@ namespace CustomReports {
 			MailUserDomain = string.Empty;
 			MailAdminAddress = string.Empty;
 			ShouldAddAdminToCopy = true;
+			MailSenderName = "CustomReportsManager";
+			MailSign = "___________________________________________" + Environment.NewLine +
+				"Это автоматически сгенерированное сообщение" + Environment.NewLine +
+				"Просьба не отвечать на него" + Environment.NewLine +
+				 "Имя системы: @machineName";
 			#endregion
 
 			#region General

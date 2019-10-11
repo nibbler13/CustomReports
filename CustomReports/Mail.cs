@@ -36,6 +36,8 @@ namespace CustomReports {
 
 		private static SmtpClient CreateClientAndMessage(string subject, string body, string receiver, out MailMessage message, string attachmentPath = "") {
 			string appName = Assembly.GetExecutingAssembly().GetName().Name;
+			if (!string.IsNullOrEmpty(Configuration.Instance.MailSenderName))
+				appName = Configuration.Instance.MailSenderName;
 
 			MailAddress from = new MailAddress(Configuration.Instance.MailUser, appName);
 			List<MailAddress> mailAddressesTo = new List<MailAddress>();
@@ -55,11 +57,9 @@ namespace CustomReports {
 					Logging.ToLog("Mail - Не удалось разобрать адрес: " + receiver + Environment.NewLine + e.Message);
 				}
 
-			body += Environment.NewLine + Environment.NewLine +
-				"___________________________________________" + Environment.NewLine +
-				"Это автоматически сгенерированное сообщение" + Environment.NewLine +
-				"Просьба не отвечать на него" + Environment.NewLine +
-				 "Имя системы: " + Environment.MachineName;
+			if (!string.IsNullOrEmpty(Configuration.Instance.MailSign))
+				body += Environment.NewLine + Environment.NewLine +
+					Configuration.Instance.MailSign.Replace("@machineName", Environment.MachineName);
 
 			message = new MailMessage();
 
