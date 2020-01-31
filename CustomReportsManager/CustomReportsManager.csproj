@@ -68,6 +68,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="DataGridComboBoxColumnWithBindingHack.cs" />
     <Compile Include="WindowAddNewReport.xaml.cs">
       <DependentUpon>WindowAddNewReport.xaml</DependentUpon>
     </Compile>

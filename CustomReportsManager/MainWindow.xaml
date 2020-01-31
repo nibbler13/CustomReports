@@ -132,11 +132,17 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
-                            <DataGridCheckBoxColumn Header="CSV"
-                                                    Binding="{Binding SaveAsCSV,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                            <DataGridComboBoxColumn Header="Формат выгрузки"
+                                                    SelectedValueBinding="{Binding SaveFormat,
+                                                        Mode=TwoWay,
+                                                        UpdateSourceTrigger=PropertyChanged}"
+                                                    x:Name="DataGridComboBoxColumnFormat">
+                            </DataGridComboBoxColumn>
 
                             <DataGridCheckBoxColumn Header="Сохранять&#x0a;в папку" 
-									                Binding="{Binding ShouldBeSavedToFolder, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+									                Binding="{Binding ShouldBeSavedToFolder, 
+                                                        Mode=TwoWay,
+                                                        UpdateSourceTrigger=PropertyChanged}"/>
 
                             <DataGridTemplateColumn Header="Путь для сохранения">
                                 <DataGridTemplateColumn.CellTemplate>

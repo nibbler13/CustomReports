@@ -228,6 +228,8 @@ namespace CustomReports {
 
 		public ObservableCollection<ItemReport> ReportItems { get; private set; }
 
+		public static ObservableCollection<string> SavingFormats { get; set; } = new ObservableCollection<string> { "Excel", "XML", "CSV" };
+
 		private DateTime dateBegin;
 		public DateTime DateBegin {
 			get { return dateBegin; }
@@ -394,6 +396,11 @@ namespace CustomReports {
 					BinaryFormatter formatter = new BinaryFormatter();
 					configuration = (Configuration)formatter.Deserialize(cryptoStream);
 					configuration.IsConfigReadedSuccessfull = true;
+
+					foreach (ItemReport item in configuration.ReportItems) {
+						if (string.IsNullOrEmpty(item.SaveFormat))
+							item.SaveFormat = SavingFormats[0];
+					}
 				};
 			} catch (Exception e) {
 				Logging.ToLog("Configuration - !!! " + e.Message + Environment.NewLine + e.StackTrace);

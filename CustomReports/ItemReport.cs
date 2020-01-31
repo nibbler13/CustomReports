@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -15,6 +16,10 @@ namespace CustomReports {
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 			Configuration.Instance.IsNeedToSave = true;
 		}
+
+
+		public string SaveFormat { get; set; } = "Excel";
+
 
 		private string id;
 		public string ID {
@@ -86,17 +91,6 @@ namespace CustomReports {
 			set {
 				if (value != folderToSave) {
 					folderToSave = value;
-					NotifyPropertyChanged();
-				}
-			}
-		}
-
-		private bool saveAsCSV;
-		public bool SaveAsCSV {
-			get { return saveAsCSV; } 
-			set {
-				if (value != saveAsCSV) {
-					saveAsCSV = value;
 					NotifyPropertyChanged();
 				}
 			}

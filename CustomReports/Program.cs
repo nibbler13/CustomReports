@@ -171,11 +171,19 @@ namespace CustomReports {
 			if (dataTableMainData.Rows.Count > 0) {
 				Logging.ToLog("Запись данных в файл");
 
-				if (itemReport.SaveAsCSV)
+				if (itemReport.SaveFormat.Equals("CSV"))
 					itemReport.FileResult = ExcelGeneral.SaveAsCSV(dataTableMainData, subject);
-				else 
+				else if (itemReport.SaveFormat.Equals("Excel"))
 					itemReport.FileResult = ExcelGeneral.WriteDataTableToExcel(
 						dataTableMainData, subject);
+				else if (itemReport.SaveFormat.Equals("XML"))
+					itemReport.FileResult = ExcelGeneral.SaveAsXML(dataTableMainData, subject);
+
+				else {
+					body = "Неподдерживаемый формат отчета";
+					hasError = true;
+					return;
+				}
 				
 				if (File.Exists(itemReport.FileResult)) {
 					body = "Отчет во вложении";

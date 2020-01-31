@@ -23,6 +23,7 @@ namespace CustomReportsManager {
 			InitializeComponent();
 
 			DataContext = CustomReports.Configuration.Instance;
+			DataGridComboBoxColumnFormat.ItemsSource = CustomReports.Configuration.SavingFormats;
 			Closing += MainWindow_Closing;
 			Loaded += (s, e) => {
 				if (!CustomReports.Configuration.Instance.IsConfigReadedSuccessfull)
@@ -103,6 +104,9 @@ namespace CustomReportsManager {
 
 			if (DataGridReports.SelectedItem == null)
 				errorMessage = "Не выбран отчет для формирования" + Environment.NewLine;
+
+			if (string.IsNullOrEmpty(((DataGridReports.SelectedItem as CustomReports.ItemReport).SaveFormat)))
+				errorMessage += "Не задан формат выгрузки" + Environment.NewLine;
 
 			if (CustomReports.Configuration.Instance.DateBegin > 
 				CustomReports.Configuration.Instance.DateEnd)

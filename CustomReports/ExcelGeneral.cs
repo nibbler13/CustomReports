@@ -12,6 +12,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using System.Windows;
 
 namespace CustomReports {
@@ -34,7 +35,7 @@ namespace CustomReports {
 			}
 		}
 
-		public static string GetResultFilePath(string resultFilePrefix, bool isCSV = false) {
+		public static string GetResultFilePath(string resultFilePrefix, bool isCSV = false, bool isXML = false) {
 			string resultPath = Path.Combine(Program.AssemblyDirectory, "Results");
 			if (!Directory.Exists(resultPath))
 				Directory.CreateDirectory(resultPath);
@@ -45,21 +46,23 @@ namespace CustomReports {
 			string fileEnding = ".xlsx";
 			if (isCSV)
 				fileEnding = ".csv";
+			else if (isXML)
+				fileEnding = ".xml";
 
 			string resultFile = Path.Combine(resultPath, resultFilePrefix + " " + DateTime.Now.ToString("yyyyMMdd_HHmmss") + fileEnding);
 			
 			return resultFile;
 		}
 
-		public static string SaveAsCSV(DataTable dataTable, string resultFilePrevix) {
-			string fileName = GetResultFilePath(resultFilePrevix, true);
+		public static string SaveAsCSV(DataTable dataTable, string resultFilePrefix) {
+			string fileName = GetResultFilePath(resultFilePrefix, isCSV: true);
 
 			StringBuilder sb = new StringBuilder();
 			IEnumerable<string> columnNames = dataTable.Columns.Cast<DataColumn>().Select(c => c.ColumnName);
-			sb.AppendLine(string.Join("\t", columnNames));
+			sb.AppendLine(string.Join(";", columnNames));
 			foreach (DataRow dataRow in dataTable.Rows) {
 				IEnumerable<string> fields = dataRow.ItemArray.Select(f => f.ToString());
-				sb.AppendLine(string.Join("\t", fields));
+				sb.AppendLine(string.Join(";", fields));
 			}
 
 			try {
@@ -70,6 +73,70 @@ namespace CustomReports {
 			}
 
 			return fileName;
+		}
+
+		public static string SaveAsXML(DataTable dataTable, string resultFilePrefix) {
+			string fileName = GetResultFilePath(resultFilePrefix, isXML: true);
+
+			StringBuilder sb = new StringBuilder();
+
+			sb.AppendLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+			sb.AppendLine("<?xml-stylesheet type=\"text/xsl\" href=\"" + GetHtmlString(fileName) + "\"?>");
+			sb.AppendLine("<CACHE>");
+			sb.AppendLine("<TITLE>" + resultFilePrefix + "</TITLE>");
+			sb.AppendLine("<STYLES>");
+			sb.AppendLine("<STYLE Id=\"0\" AlignText=\"Center\" FontName=\"Tahoma\" FontCharset=\"1\" Bold=\"False\" Italic=\"False\" Underline=\"False\" StrikeOut=\"False\" FontColor=\"rgb(0,0,0)\" FontSize=\"8\" BrushStyle=\"Solid\" BrushBkColor=\"rgb(240,240,240)\" BrushFgColor=\"rgb(0,0,0)\">");
+			sb.AppendLine("<BORDER_LEFT IsDefault=\"False\" Color=\"rgb(160,160,160)\" Width=\"1\"/>");
+			sb.AppendLine("<BORDER_UP IsDefault=\"False\" Color=\"rgb(160,160,160)\" Width=\"1\"/>");
+			sb.AppendLine("<BORDER_RIGHT IsDefault=\"False\" Color=\"rgb(160,160,160)\" Width=\"1\"/>");
+			sb.AppendLine("<BORDER_DOWN IsDefault=\"False\" Color=\"rgb(160,160,160)\" Width=\"1\"/>");
+			sb.AppendLine("</STYLE>");
+			sb.AppendLine("<STYLE Id=\"1\" AlignText=\"Center\" FontName=\"Tahoma\" FontCharset=\"1\" Bold=\"False\" Italic=\"False\" Underline=\"False\" StrikeOut=\"False\" FontColor=\"rgb(0,0,0)\" FontSize=\"8\" BrushStyle=\"Solid\" BrushBkColor=\"rgb(255,255,255)\" BrushFgColor=\"rgb(0,0,0)\">");
+			sb.AppendLine("<BORDER_LEFT IsDefault=\"False\" Color=\"rgb(192,192,192)\" Width=\"1\"/>");
+			sb.AppendLine("<BORDER_UP IsDefault=\"False\" Color=\"rgb(192,192,192)\" Width=\"1\"/>");
+			sb.AppendLine("<BORDER_RIGHT IsDefault=\"False\" Color=\"rgb(192,192,192)\" Width=\"1\"/>");
+			sb.AppendLine("<BORDER_DOWN IsDefault=\"False\" Color=\"rgb(192,192,192)\" Width=\"1\"/>");
+			sb.AppendLine("</STYLE>");
+			sb.AppendLine("<STYLE Id=\"2\" AlignText=\"Left\" FontName=\"Tahoma\" FontCharset=\"1\" Bold=\"False\" Italic=\"False\" Underline=\"False\" StrikeOut=\"False\" FontColor=\"rgb(0,0,0)\" FontSize=\"8\" BrushStyle=\"Solid\" BrushBkColor=\"rgb(255,255,255)\" BrushFgColor=\"rgb(0,0,0)\">");
+			sb.AppendLine("<BORDER_LEFT IsDefault=\"False\" Color=\"rgb(192,192,192)\" Width=\"1\"/>");
+			sb.AppendLine("<BORDER_UP IsDefault=\"False\" Color=\"rgb(192,192,192)\" Width=\"1\"/>");
+			sb.AppendLine("<BORDER_RIGHT IsDefault=\"False\" Color=\"rgb(192,192,192)\" Width=\"1\"/>");
+			sb.AppendLine("<BORDER_DOWN IsDefault=\"False\" Color=\"rgb(192,192,192)\" Width=\"1\"/>");
+			sb.AppendLine("</STYLE>");
+			sb.AppendLine("</STYLES>");
+			sb.AppendLine("<LINES ColCount=\"" + dataTable.Columns.Count + "\" RowCount=\"" + (dataTable.Rows.Count + 1) + "\">");
+
+			sb.AppendLine("<LINE Height=\"19\">");
+			foreach (DataColumn column in dataTable.Columns)
+				sb.AppendLine("<CELL StyleClass=\"0\" Width=\"70\" Align=\"Center\">" + GetHtmlString(column.ColumnName) + "</CELL>");
+
+			sb.AppendLine("</LINE>");
+			sb.AppendLine("");
+
+			foreach (DataRow row in dataTable.Rows) {
+				sb.AppendLine("<LINE Height=\"18\">");
+				foreach (object item in row.ItemArray)
+					sb.AppendLine("<CELL StyleClass=\"1\" Width=\"70\" Align=\"Center\">" + GetHtmlString(item.ToString()) + "</CELL>");
+
+				sb.AppendLine("</LINE>");
+				sb.AppendLine("");
+			}
+
+			sb.AppendLine("</LINES>");
+			sb.AppendLine("</CACHE>");
+
+			try {
+				File.WriteAllText(fileName, sb.ToString());
+			} catch (Exception e) {
+				Logging.ToLog(e.Message + Environment.NewLine + e.StackTrace);
+				return string.Empty;
+			}
+
+			return fileName;
+		}
+
+		private static string GetHtmlString(string text) {
+			return HttpUtility.HtmlEncode(text);
 		}
 
 		protected static bool SaveAndCloseIWorkbook(IWorkbook workbook, string resultFile) {
